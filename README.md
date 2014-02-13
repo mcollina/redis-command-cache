@@ -1,4 +1,4 @@
-cache-redis
+redis-command-cache
 ===========
 
 Sometimes we need to run at such an high pace that we cannot hit redis
@@ -12,8 +12,8 @@ Usage
 
 ```javascript
 var redis = require("redis");
-var cacheRedis = require("cache-redis");
-var cache = cacheRedis(db.createClient(), db.createClient());
+var redisCache = require("redis-command-cache");
+var cache = redisCache(db.createClient(), db.createClient());
 
 cache.set("key", "aaa", function() {
   cache.get("key", function(err, value) {
@@ -25,6 +25,9 @@ cache.set("key", "aaa", function() {
 
 Supported Commands
 ------------------
+
+The following commands have the same signature of node-redis, but they
+invalidate all the connected caches.
 
 * get()
 * set()
@@ -40,4 +43,3 @@ __cache-redis__ uses two redis connections one of which is used for
 a pubsub channel for key invalidations. It assumes that the number of
 writes on cached data is lower than the number of reads by some order of
 magnitude.
-
