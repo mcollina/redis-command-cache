@@ -1,5 +1,5 @@
 {
-  "name": "cache-redis",
+  "name": "redis-command-cache",
   "version": "0.0.0",
   "description": "cache redis calls locally, and expire them at need",
   "main": "index.js",
