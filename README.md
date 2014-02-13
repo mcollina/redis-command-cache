@@ -1,4 +1,4 @@
-cache-redis
+cache-redis [![Code Climate](https://codeclimate.com/github/mcollina/redis-command-cache.png)](https://codeclimate.com/github/mcollina/redis-command-cache)
 ===========
 
 Sometimes we need to run at such an high pace that we cannot hit redis
