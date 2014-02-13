@@ -25,8 +25,10 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-var LRU = require("lru-cache");
-var util = require("util");
+'use strict';
+var LRU = require('lru-cache');
+
+
 
 function CacheRedis(db, subDb) {
   if (!(this instanceof CacheRedis)) {
@@ -43,24 +45,26 @@ function CacheRedis(db, subDb) {
 
   this._cache = cache;
 
-  subDb.subscribe("invalidations");
-  subDb.on("message", function undoCaching(channel, message) {
+  subDb.subscribe('invalidations');
+  subDb.on('message', function undoCaching(channel, message) {
     if (channel === 'invalidations') cache.del(message);
-  })
+  });
 }
+
 
 function createInvalidationMethod(method) {
   return function invalidate() {
     this.db[method].apply(this.db, arguments);
-    this.db.publish("invalidations", arguments[0]);
+    this.db.publish('invalidations', arguments[0]);
     return this;
-  }
+  };
 }
 
-CacheRedis.prototype.set = createInvalidationMethod("set");
-CacheRedis.prototype.del = createInvalidationMethod("del");
-CacheRedis.prototype.sadd = createInvalidationMethod("sadd");
-CacheRedis.prototype.srem = createInvalidationMethod("srem");
+CacheRedis.prototype.set = createInvalidationMethod('set');
+CacheRedis.prototype.del = createInvalidationMethod('del');
+CacheRedis.prototype.sadd = createInvalidationMethod('sadd');
+CacheRedis.prototype.srem = createInvalidationMethod('srem');
+
 
 function createCacheableMethod(type) {
   return function cacheable(key, cb) {
@@ -80,11 +84,12 @@ function createCacheableMethod(type) {
     });
 
     return this;
-  }
+  };
 }
 
-CacheRedis.prototype.get = createCacheableMethod("get");
-CacheRedis.prototype.smembers = createCacheableMethod("smembers");
+CacheRedis.prototype.get = createCacheableMethod('get');
+CacheRedis.prototype.smembers = createCacheableMethod('smembers');
+
 
 function multiExec(cb) {
   this.db.exec(cb);
@@ -97,5 +102,7 @@ CacheRedis.prototype.multi = function multi() {
 
   return multi;
 };
+
+
 
 module.exports = CacheRedis;
