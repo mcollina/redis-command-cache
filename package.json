@@ -11,6 +11,13 @@
   "dependencies": {
     "lru-cache": "~2.5.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcollina/redis-command-cache.git"
+  },
+  "bugs": {
+    "url": "http://github.com/mcollina/redis-command-cache/issues"
+  },
   "devDependencies": {
     "tap": "~0.4.8",
     "redis": "~0.10.0"
