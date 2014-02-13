@@ -36,12 +36,26 @@ test("it invalidates another cache", function(t) {
     db2.get("key", function(err, value) {
       t.equal(value, "aaa");
       db1.set("key", expected, function() {
-        setTimeout(function() {
-          db2.get("key", function(err, value) {
-            t.equal(value, expected);
-            t.end();
-          });
-        }, 10);
+        db2.get("key", function(err, value) {
+          t.equal(value, expected);
+          t.end();
+        });
+      });
+    });
+  });
+});
+
+test("it invalidates another cache on del", function(t) {
+  var db1 = getCache();
+  var db2 = getCache();
+  var expected = "value" + Math.random();
+  db1.set("key", "aaa", function() {
+    db2.get("key", function(err, value) {
+      db1.del("key", function() {
+        db2.get("key", function(err, value) {
+          t.equal(value, null);
+          t.end();
+        });
       });
     });
   });

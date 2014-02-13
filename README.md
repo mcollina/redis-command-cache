@@ -23,6 +23,13 @@ cache.set("key", "aaa", function() {
 });
 ```
 
+Supported Commands
+------------------
+
+* get()
+* set()
+* del()
+
 How
 ---
 

@@ -30,6 +30,13 @@ CacheRedis.prototype.set = function set(key, value, cb) {
   return this;
 };
 
+CacheRedis.prototype.del = function del(key, cb) {
+  this.db.publish("invalidations", key);
+  this.db.del(key, cb);
+
+  return this;
+};
+
 CacheRedis.prototype.get = function set(key, cb) {
   var cache = this._cache;
   var cached = this._cache.get(key);
