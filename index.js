@@ -26,6 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 var LRU = require("lru-cache");
+var util = require("util");
 
 function CacheRedis(db, subDb) {
   if (!(this instanceof CacheRedis)) {
@@ -84,5 +85,17 @@ function createCacheableMethod(type) {
 
 CacheRedis.prototype.get = createCacheableMethod("get");
 CacheRedis.prototype.smembers = createCacheableMethod("smembers");
+
+function multiExec(cb) {
+  this.db.exec(cb);
+}
+
+CacheRedis.prototype.multi = function multi() {
+  var multi = Object.create(this);
+  multi.db = this.db.multi();
+  multi.exec = multiExec;
+
+  return multi;
+};
 
 module.exports = CacheRedis;

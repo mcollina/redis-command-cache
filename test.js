@@ -144,3 +144,16 @@ test("it invalidates on srem", function(t) {
     });
   });
 });
+
+test("it should support multi", function(t) {
+  var db = getCache();
+  var multi = db.multi();
+  multi.sadd("aSet", "a");
+  multi.sadd("aSet", "b");
+  multi.exec(function() {
+    db.smembers("aSet", function(err, values) {
+      t.deepEqual(values, ["b", "a"]);
+      t.end();
+    });
+  });
+});
