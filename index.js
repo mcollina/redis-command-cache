@@ -11,7 +11,6 @@ function CacheRedis(db, subDb) {
 
   var cache = new LRU({
     max: 500,
-    length: lengthResult,
     maxAge: 1000 * 60 * 10 // 10 minutes
   });
 
@@ -23,42 +22,41 @@ function CacheRedis(db, subDb) {
   })
 }
 
-CacheRedis.prototype.set = function set(key, value, cb) {
-  this.db.publish("invalidations", key);
-  this.db.set(key, value, cb);
-
-  return this;
-};
-
-CacheRedis.prototype.del = function del(key, cb) {
-  this.db.publish("invalidations", key);
-  this.db.del(key, cb);
-
-  return this;
-};
-
-CacheRedis.prototype.get = function set(key, cb) {
-  var cache = this._cache;
-  var cached = this._cache.get(key);
-
-  if (cached) {
-    cb(null, cached);
+function createInvalidationMethod(method) {
+  return function invalidate() {
+    this.db[method].apply(this.db, arguments);
+    this.db.publish("invalidations", arguments[0]);
     return this;
   }
-
-  this.db.get(key, function(err, value) {
-    if (err) return cb(err);
-
-    cache.set(key, value);
-    cb(null, value);
-  });
-
-  return this;
-};
-
-function lengthResult(value) {
-  if (value instanceof Array) return value.length;
-  return 1;
 }
+
+CacheRedis.prototype.set = createInvalidationMethod("set");
+CacheRedis.prototype.del = createInvalidationMethod("del");
+CacheRedis.prototype.sadd = createInvalidationMethod("sadd");
+CacheRedis.prototype.srem = createInvalidationMethod("srem");
+
+function createCacheableMethod(type) {
+  return function cacheable(key, cb) {
+    var cache = this._cache;
+    var cached = this._cache.get(key);
+
+    if (cached) {
+      cb(null, cached);
+      return this;
+    }
+
+    this.db[type](key, function(err, value) {
+      if (err) return cb(err);
+
+      cache.set(key, value);
+      cb(null, value);
+    });
+
+    return this;
+  }
+}
+
+CacheRedis.prototype.get = createCacheableMethod("get");
+CacheRedis.prototype.smembers = createCacheableMethod("smembers");
 
 module.exports = CacheRedis;

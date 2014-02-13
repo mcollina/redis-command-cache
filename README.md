@@ -29,6 +29,9 @@ Supported Commands
 * get()
 * set()
 * del()
+* sadd()
+* srem()
+* smembers()
 
 How
 ---
