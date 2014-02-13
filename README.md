@@ -1,11 +1,11 @@
-redis-command-cache
-===========
+redis-command-cache [![Code Climate](https://codeclimate.com/github/mcollina/redis-command-cache.png)](https://codeclimate.com/github/mcollina/redis-command-cache)
+===================
 
 Sometimes we need to run at such an high pace that we cannot hit redis
 every time. We must cache values locally, and invalidate it at any
 change.
 
-This modules uses [lru-cache](https://www.npmjs.org/package/lru-cache).
+This module uses [lru-cache](https://www.npmjs.org/package/lru-cache).
 
 Usage
 -----
@@ -39,7 +39,7 @@ invalidate all the connected caches.
 How
 ---
 
-__cache-redis__ uses two redis connections one of which is used for
+**redis-command-cache** uses two redis connections one of which is used for
 a pubsub channel for key invalidations. It assumes that the number of
 writes on cached data is lower than the number of reads by some order of
 magnitude.
