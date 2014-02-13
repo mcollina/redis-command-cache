@@ -52,21 +52,31 @@ function CacheRedis(db, subDb) {
 }
 
 
-function createInvalidationMethod(method) {
+// Give advice to a redis command
+// to publish invalidation.
+//
+function createInvalidationCommand(redisCommandName) {
   return function invalidate() {
-    this.db[method].apply(this.db, arguments);
+    this.db[redisCommandName].apply(this.db, arguments);
     this.db.publish('invalidations', arguments[0]);
     return this;
   };
 }
 
-CacheRedis.prototype.set = createInvalidationMethod('set');
-CacheRedis.prototype.del = createInvalidationMethod('del');
-CacheRedis.prototype.sadd = createInvalidationMethod('sadd');
-CacheRedis.prototype.srem = createInvalidationMethod('srem');
+CacheRedis.prototype.set = createInvalidationCommand('set');
+CacheRedis.prototype.del = createInvalidationCommand('del');
+CacheRedis.prototype.sadd = createInvalidationCommand('sadd');
+CacheRedis.prototype.srem = createInvalidationCommand('srem');
 
 
-function createCacheableMethod(type) {
+// Give advice to a redis command
+// to check for query result in cache
+// before either-or hitting database.
+//
+// If the database *is* hit then cache
+// *that* result.
+//
+function createCacheableCommand(redisCommandName) {
   return function cacheable(key, cb) {
     var cache = this._cache;
     var cached = this._cache.get(key);
@@ -76,7 +86,7 @@ function createCacheableMethod(type) {
       return this;
     }
 
-    this.db[type](key, function(err, value) {
+    this.db[redisCommandName](key, function(err, value) {
       if (err) return cb(err);
 
       cache.set(key, value);
@@ -87,8 +97,8 @@ function createCacheableMethod(type) {
   };
 }
 
-CacheRedis.prototype.get = createCacheableMethod('get');
-CacheRedis.prototype.smembers = createCacheableMethod('smembers');
+CacheRedis.prototype.get = createCacheableCommand('get');
+CacheRedis.prototype.smembers = createCacheableCommand('smembers');
 
 
 function multiExec(cb) {
