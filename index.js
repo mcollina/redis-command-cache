@@ -30,17 +30,17 @@ var LRU = require('lru-cache');
 
 
 
-function CacheRedis(db, subDb) {
+function CacheRedis(db, subDb, maxSize, ttl) {
   if (!(this instanceof CacheRedis)) {
     return new CacheRedis(db, subDb);
   }
-
   this.db = db;
   this.subDb = subDb;
+  this.ttl = ttl;
 
   var cache = new LRU({
-    max: 500,
-    maxAge: 1000 * 60 * 10 // 10 minutes
+    max: maxSize || 500,
+    maxAge: ttl * 1000 || 1000 * 60 * 10 // 10 minutes
   });
 
   this._cache = cache;
@@ -63,7 +63,18 @@ function createInvalidationCommand(redisCommandName) {
   };
 }
 
-CacheRedis.prototype.set = createInvalidationCommand('set');
+function createSetCommand() {
+  return function invalidate() {
+    this.db.set.apply(this.db, arguments);
+    if (this.ttl) {
+      this.db.expire(arguments[0], this.ttl);
+    }
+    this.db.publish('invalidations', arguments[0]);
+    return this;
+  };
+}
+
+CacheRedis.prototype.set = createSetCommand();
 CacheRedis.prototype.del = createInvalidationCommand('del');
 CacheRedis.prototype.sadd = createInvalidationCommand('sadd');
 CacheRedis.prototype.srem = createInvalidationCommand('srem');
