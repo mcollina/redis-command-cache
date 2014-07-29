@@ -4,7 +4,7 @@
   "description": "cache redis calls locally, and expire them at need",
   "main": "index.js",
   "scripts": {
-    "test": "tap --timeout 2 test.js"
+    "test": "tap --timeout 10 test.js"
   },
   "author": "Matteo Collina <hello@matteocollina.com>",
   "license": "BSD-2-Clause",

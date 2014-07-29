@@ -107,7 +107,9 @@ test("it executes sadd/smembers", function(t) {
   db.sadd("aSet", "a", function() {
     db.sadd("aSet", "b", function() {
       db.smembers("aSet", function(err, values) {
-        t.deepEqual(values, ["b", "a"]);
+        t.assert(values.indexOf("a") >= 0, "contains 'a'");
+        t.assert(values.indexOf("b") >= 0, "contains 'a'");
+        t.equal(values.length, 2, "has 2 elements");
         t.end();
       });
     });
@@ -132,7 +134,9 @@ test("it invalidates on sadd", function(t) {
     db.smembers("aSet", function(err, values) {
       db.sadd("aSet", "b", function() {
         db.smembers("aSet", function(err, values) {
-          t.deepEqual(values, ["b", "a"]);
+          t.assert(values.indexOf("a") >= 0, "contains 'a'");
+          t.assert(values.indexOf("b") >= 0, "contains 'a'");
+          t.equal(values.length, 2, "has 2 elements");
           t.end();
         });
       });
@@ -145,7 +149,9 @@ test("it invalidates on srem", function(t) {
   db.sadd("aSet", "a")
   db.sadd("aSet", "b", function() {
     db.smembers("aSet", function(err, values) {
-      t.deepEqual(values, ["b", "a"]);
+      t.assert(values.indexOf("a") >= 0, "contains 'a'");
+      t.assert(values.indexOf("b") >= 0, "contains 'a'");
+      t.equal(values.length, 2, "has 2 elements");
       db.srem("aSet", "a", function() {
         setTimeout(function() {
             db.smembers("aSet", function(err, values) {
@@ -165,7 +171,9 @@ test("it should support multi", function(t) {
   multi.sadd("aSet", "b");
   multi.exec(function() {
     db.smembers("aSet", function(err, values) {
-      t.deepEqual(values, ["b", "a"]);
+      t.assert(values.indexOf("a") >= 0, "contains 'a'");
+      t.assert(values.indexOf("b") >= 0, "contains 'a'");
+      t.equal(values.length, 2, "has 2 elements");
       t.end();
     });
   });
