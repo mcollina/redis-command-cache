@@ -9,7 +9,7 @@ function getClient() {
   return client;
 }
 
-function getCache() {
+function getCache(size, ttl) {
   var setdb = getClient();
   var subdb = getClient();
 
@@ -18,7 +18,7 @@ function getCache() {
     subdb.quit();
   });
 
-  return cacheRedis(setdb, subdb);
+  return new cacheRedis(setdb, subdb, size, ttl);
 }
 
 function mockToNotOk(db, func, t) {
@@ -36,6 +36,19 @@ test("it execute a set and get", function(t) {
       t.equal(value, expected);
       t.end();
     });
+  });
+});
+
+test("it expires", function(t) {
+  var db = getCache(10, 1);
+  var expected = "value" + Math.random();
+  db.set("key", expected, function() {
+    setTimeout(function(){
+      db.db.get("key", function(err, value) {
+        t.equal(value, null);
+        t.end();
+      });
+    }, 2000);
   });
 });
 
